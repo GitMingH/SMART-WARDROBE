@@ -1,0 +1,8 @@
+{
+  "name": "智能衣橱管家",
+  "description": "基于 AI 的个人穿搭助手，帮你降本增效，理性管理衣橱。",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ]
+}
