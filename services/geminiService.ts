@@ -40,24 +40,43 @@ const parseGeminiJson = (text: string) => {
 // --- Custom Proxy Fetcher for China Access ---
 // This allows the browser to send requests to our own domain (Vercel),
 // which then forwards them to Google.
+// const customFetch = async (url: RequestInfo | URL, init?: RequestInit) => {
+//     let urlStr = url.toString();
+//     // Only intercept Google API calls
+//     if (urlStr.includes('generativelanguage.googleapis.com')) {
+//         // Replace the Google domain with our local proxy path defined in vercel.json
+//         urlStr = urlStr.replace('https://generativelanguage.googleapis.com', '/google-api');
+//     }
+//     return fetch(urlStr, init);
+// };
+
+// const getAiClient = () => {
+//   // Inject custom fetch to handle proxying
+//   return new GoogleGenAI({ 
+//       apiKey: process.env.API_KEY,
+//       fetch: customFetch
+//   } as any);
+// };
 const customFetch = async (url: RequestInfo | URL, init?: RequestInit) => {
     let urlStr = url.toString();
-    // Only intercept Google API calls
+    // 拦截发往 Google 的 API 请求
     if (urlStr.includes('generativelanguage.googleapis.com')) {
-        // Replace the Google domain with our local proxy path defined in vercel.json
+        // 将域名替换为当前环境的相对路径 /google-api
+        // Cloudflare Pages 会自动触发我们刚才写的 functions/google-api.js
         urlStr = urlStr.replace('https://generativelanguage.googleapis.com', '/google-api');
     }
     return fetch(urlStr, init);
 };
 
 const getAiClient = () => {
-  // Inject custom fetch to handle proxying
+  // 优先从 process.env 获取，Vite 编译时会注入
+  const apiKey = process.env.GEMINI_API_KEY || '';
+  
   return new GoogleGenAI({ 
-      apiKey: process.env.API_KEY,
+      apiKey: apiKey,
       fetch: customFetch
   } as any);
 };
-
 // --- Retry Logic ---
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
